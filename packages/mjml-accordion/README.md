@@ -1,6 +1,6 @@
 ## mj-accordion
 
-<p align="center">
+<p style="text-align: center;" >
   <img src="https://i.imgur.com/C4S9MVc.gif" alt="accordion" />
 </p>
 
@@ -44,7 +44,7 @@
 </mjml>
 ```
 
-<p align="center">
+<p style="text-align: center;" >
   <a href="https://mjml.io/try-it-live/components/accordion">
     <img width="100px" src="https://mjml.io/assets/img/svg/TRYITLIVE.svg" alt="sexy" />
   </a>
@@ -52,8 +52,8 @@
 
 attribute | unit | description | default value
 ----------|------|-------------|---------------
-border | string | CSS border format | none
-container-background-color | n/a | background-color of the cell | n/a,
+border | string | CSS border format | 2px solid black
+container-background-color | n/a | background-color of the cell | n/a
 css-class | string | class name, added to the root HTML element created | n/a
 font-family | n/a | font | Ubuntu, Helvetica, Arial, sans-serif
 icon-align | n/a | icon alignment | middle

@@ -19,7 +19,7 @@ Use `background-color` to provide a fallback color
 
 Fixed height
 
-<p align="center">
+<p style="text-align: center;" >
   <img src="https://cloud.githubusercontent.com/assets/1830348/15354833/bfe7faaa-1cef-11e6-8d38-15e8951b6636.png"
      alt="demo background picture with fixed height" />
 </p>
@@ -32,7 +32,8 @@ Fixed height
       height="469px"
       background-width="600px"
       background-height="469px"
-      background-url="https://cloud.githubusercontent.com/assets/1830348/15354890/1442159a-1cf0-11e6-92b1-b861dadf1750.jpg"
+      background-url=
+          "https://cloud.githubusercontent.com/assets/1830348/15354890/1442159a-1cf0-11e6-92b1-b861dadf1750.jpg"
       background-color="#2a3448"
       padding="100px 0px">
       <mj-text
@@ -53,7 +54,7 @@ Fixed height
 </mjml>
  ```
 
- <p align="center">
+ <p style="text-align: center;" >
    <a href="https://mjml.io/try-it-live/components/hero">
      <img width="100px" src="https://mjml.io/assets/img/svg/TRYITLIVE.svg" alt="try it live" />
    </a>
@@ -61,7 +62,7 @@ Fixed height
 
 Fluid height
 
-<p align="center">
+<p style="text-align: center;" >
   <img src="https://cloud.githubusercontent.com/assets/1830348/15354867/fc2f404a-1cef-11e6-92ac-92de9e438210.png"
       alt="demo background picture with fixed height" />
 </p>
@@ -73,10 +74,10 @@ Fluid height
       mode="fluid-height"
       background-width="600px"
       background-height="469px"
-      background-url="https://cloud.githubusercontent.com/assets/1830348/15354890/1442159a-1cf0-11e6-92b1-b861dadf1750.jpg"
+      background-url=
+          "https://cloud.githubusercontent.com/assets/1830348/15354890/1442159a-1cf0-11e6-92b1-b861dadf1750.jpg"
       background-color="#2a3448"
-      padding="100px 0px"
-      width="100%">
+      padding="100px 0px">
       <mj-text
         padding="20px"
         color="#ffffff"
@@ -95,7 +96,7 @@ Fluid height
 </mjml>
 ```
 
-<p align="center">
+<p style="text-align: center;" >
   <a href="https://mjml.io/try-it-live/components/hero/1">
     <img width="100px" src="https://mjml.io/assets/img/svg/TRYITLIVE.svg"
       alt="try it live" />
@@ -105,10 +106,10 @@ Fluid height
 attribute           | unit                                | description                                                          | default value
 --------------------|-------------------------------------|----------------------------------------------------------------------|--------------
 background-color    | color                               | hero background color                                                | #ffffff
-background-height   | px                                  | height of the image used (mandatory in fixed-height mode)            | none
+background-height   | px                                  | height of the image used, mandatory                                  | none
 background-position | top/center/bottom left/center/right | background image position                                            | center center
 background-url      | url                                 | absolute background url                                              | n/a
-background-width    | px                                  | width of the image used                                              | parent element width
+background-width    | px                                  | width of the image used, mandatory                                   | parent element width
 border-radius       | px                                  | border radius                                                        | n/a
 height              | px                                  | hero section height (required for fixed-height mode)                 | 0px
 mode                | fluid-height/fixed-height           | choose if the height is fixed based on the height attribute or fluid | fluid-height
