@@ -11,6 +11,7 @@ export default class MjAccordionTitle extends BodyComponent {
     color: 'color',
     'font-size': 'unit(px)',
     'font-family': 'string',
+    'font-weight': 'string',
     'padding-bottom': 'unit(px,%)',
     'padding-left': 'unit(px,%)',
     'padding-right': 'unit(px,%)',
@@ -30,12 +31,13 @@ export default class MjAccordionTitle extends BodyComponent {
         'background-color': this.getAttribute('background-color'),
         color: this.getAttribute('color'),
         'font-size': this.getAttribute('font-size'),
-        'font-family': this.getAttribute('font-family'),
+        'font-family': this.resolveFontFamily(),
+        'font-weight': this.getAttribute('font-weight'),
+        padding: this.getAttribute('padding'),
         'padding-bottom': this.getAttribute('padding-bottom'),
         'padding-left': this.getAttribute('padding-left'),
         'padding-right': this.getAttribute('padding-right'),
         'padding-top': this.getAttribute('padding-top'),
-        padding: this.getAttribute('padding'),
       },
       table: {
         width: '100%',
@@ -52,6 +54,23 @@ export default class MjAccordionTitle extends BodyComponent {
         height: this.getAttribute('icon-height'),
       },
     }
+  }
+
+  resolveFontFamily() {
+    if (
+      this.props &&
+      this.props.rawAttrs &&
+      Object.prototype.hasOwnProperty.call(this.props.rawAttrs, 'font-family')
+    ) {
+      return this.getAttribute('font-family')
+    }
+    if (this.context && this.context.elementFontFamily) {
+      return this.context.elementFontFamily
+    }
+    if (this.context && this.context.accordionFontFamily) {
+      return this.context.accordionFontFamily
+    }
+    return MjAccordionTitle.defaultAttributes.fontFamily
   }
 
   renderTitle() {
@@ -100,17 +119,18 @@ export default class MjAccordionTitle extends BodyComponent {
 
   render() {
     const contentElements = [this.renderTitle(), this.renderIcons()]
-    const content = (this.getAttribute('icon-position') === 'right'
-      ? contentElements
-      : contentElements.reverse()
+    const content = (
+      this.getAttribute('icon-position') === 'right'
+        ? contentElements
+        : contentElements.reverse()
     ).join('\n')
 
     return `
       <div ${this.htmlAttributes({ class: 'mj-accordion-title' })}>
         <table
           ${this.htmlAttributes({
-            'cellspacing': '0',
-            'cellpadding': '0',
+            cellspacing: '0',
+            cellpadding: '0',
             style: 'table',
           })}
         >

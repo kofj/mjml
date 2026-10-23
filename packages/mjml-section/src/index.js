@@ -22,6 +22,7 @@ export default class MjSection extends BodyComponent {
     'border-top': 'string',
     direction: 'enum(ltr,rtl)',
     'full-width': 'enum(full-width,false,)',
+    gutter: 'unit(px,%)',
     padding: 'unit(px,%){1,4}',
     'padding-top': 'unit(px,%)',
     'padding-bottom': 'unit(px,%)',
@@ -47,6 +48,9 @@ export default class MjSection extends BodyComponent {
     return {
       ...this.context,
       containerWidth: `${box}px`,
+      gap: this.getAttribute('gap'),
+      gutter: this.getAttribute('gutter'),
+      direction: this.getAttribute('direction'),
     }
   }
 
@@ -54,6 +58,10 @@ export default class MjSection extends BodyComponent {
     const { containerWidth } = this.context
 
     const fullWidth = this.isFullWidth()
+
+    const hasBorderRadius = this.hasBorderRadius()
+
+    const isFirstSection = this.props.index === 0
 
     const background = this.getAttribute('background-url')
       ? {
@@ -72,12 +80,11 @@ export default class MjSection extends BodyComponent {
       tableFullwidth: {
         ...(fullWidth ? background : {}),
         width: '100%',
-        'border-radius': this.getAttribute('border-radius'),
       },
       table: {
         ...(fullWidth ? {} : background),
         width: '100%',
-        'border-radius': this.getAttribute('border-radius'),
+        ...(hasBorderRadius && { 'border-collapse': 'separate' }),
       },
       td: {
         border: this.getAttribute('border'),
@@ -85,6 +92,7 @@ export default class MjSection extends BodyComponent {
         'border-left': this.getAttribute('border-left'),
         'border-right': this.getAttribute('border-right'),
         'border-top': this.getAttribute('border-top'),
+        'border-radius': this.getAttribute('border-radius'),
         direction: this.getAttribute('direction'),
         'font-size': '0px',
         padding: this.getAttribute('padding'),
@@ -97,8 +105,10 @@ export default class MjSection extends BodyComponent {
       div: {
         ...(fullWidth ? {} : background),
         margin: '0px auto',
-        'border-radius': this.getAttribute('border-radius'),
         'max-width': containerWidth,
+        'border-radius': this.getAttribute('border-radius'),
+        ...(hasBorderRadius && { overflow: 'hidden' }),
+        'margin-top': !isFirstSection ? this.context.gap : undefined,
       },
       innerDiv: {
         'line-height': '0',
@@ -187,11 +197,25 @@ export default class MjSection extends BodyComponent {
     return this.getAttribute('full-width') === 'full-width'
   }
 
+  hasBorderRadius() {
+    const borderRadius = this.getAttribute('border-radius')
+    return borderRadius !== '' && typeof borderRadius !== 'undefined'
+  }
+
+  hasGap() {
+    const { gap } = this.context
+    return gap != null && gap !== ''
+  }
+
   renderBefore() {
     const { containerWidth } = this.context
     const bgcolorAttr = this.getAttribute('background-color')
       ? { bgcolor: this.getAttribute('background-color') }
       : {}
+
+    const isFirstSection = this.props.index === 0
+
+    const hasGap = this.hasGap()
 
     return `
       <!--[if mso | IE]>
@@ -203,9 +227,12 @@ export default class MjSection extends BodyComponent {
           cellspacing: '0',
           class: suffixCssClasses(this.getAttribute('css-class'), 'outlook'),
           role: 'presentation',
-          style: { width: `${containerWidth}` },
+          style: {
+            width: `${containerWidth}`,
+            'padding-top': !isFirstSection ? this.context.gap : undefined,
+          },
           width: parseInt(containerWidth, 10),
-          ...bgcolorAttr,
+          ...(!hasGap && { ...bgcolorAttr }),
         })}
       >
         <tr>

@@ -8,22 +8,25 @@ export function readMjmlConfig(configPathOrDir = process.cwd()) {
   let componentRootPath = process.cwd()
   let mjmlConfigPath = configPathOrDir
   try {
-    mjmlConfigPath =
-      path.basename(configPathOrDir).match(/^\.mjmlconfig(\.js)?$/)
-        ? path.resolve(configPathOrDir)
-        : path.resolve(configPathOrDir, '.mjmlconfig')
+    mjmlConfigPath = path
+      .basename(configPathOrDir)
+      .match(/^\.mjmlconfig(\.js)?$/)
+      ? path.resolve(configPathOrDir)
+      : path.resolve(configPathOrDir, '.mjmlconfig')
     componentRootPath = path.dirname(mjmlConfigPath)
-    
+
     const fullPath = path.resolve(mjmlConfigPath)
 
     let mjmlConfig
     if (path.extname(mjmlConfigPath) === '.js') {
-      delete require.cache[fullPath]
-      mjmlConfig = require(fullPath) // eslint-disable-line global-require, import/no-dynamic-require
+      if (process.env && process.env.MJML_BROWSER) {
+        mjmlConfig = { packages: [], options: {} }
+      } else {
+        delete require.cache[fullPath]
+        mjmlConfig = require(fullPath) // eslint-disable-line global-require, import/no-dynamic-require
+      }
     } else {
-      mjmlConfig = JSON.parse(
-        fs.readFileSync(fullPath, 'utf8'),
-      )
+      mjmlConfig = JSON.parse(fs.readFileSync(fullPath, 'utf8'))
     }
 
     return { mjmlConfig, componentRootPath }
@@ -46,6 +49,9 @@ export function resolveComponentPath(compPath, componentRootPath) {
   }
   if (!compPath.startsWith('.') && !path.isAbsolute(compPath)) {
     try {
+      if (process.env && process.env.MJML_BROWSER) {
+        return null
+      }
       return require.resolve(compPath)
     } catch (e) {
       if (e.code !== 'MODULE_NOT_FOUND') {
@@ -64,6 +70,9 @@ export function resolveComponentPath(compPath, componentRootPath) {
         return resolveComponentPath(`./${compPath}`, componentRootPath)
       }
     }
+  }
+  if (process.env && process.env.MJML_BROWSER) {
+    return null
   }
   return require.resolve(path.resolve(componentRootPath, compPath))
 }
@@ -97,15 +106,18 @@ export function handleMjmlConfigComponents(
     try {
       resolvedPath = resolveComponentPath(compPath, componentRootPath)
       if (resolvedPath) {
-        const requiredComp = require(resolvedPath) // eslint-disable-line global-require, import/no-dynamic-require
-        registerCustomComponent(
-          requiredComp.default || requiredComp,
-          registerCompFn,
-        )
-        registerDependencies(
-          (requiredComp.default || requiredComp).dependencies || {},
-        )
-        result.success.push(compPath)
+        // Avoid dynamic require in browser builds; only load components in Node
+        if (!(process.env && process.env.MJML_BROWSER)) {
+          const requiredComp = require(resolvedPath) // eslint-disable-line global-require, import/no-dynamic-require
+          registerCustomComponent(
+            requiredComp.default || requiredComp,
+            registerCompFn,
+          )
+          registerDependencies(
+            (requiredComp.default || requiredComp).dependencies || {},
+          )
+          result.success.push(compPath)
+        }
       }
     } catch (e) {
       result.failures.push({ error: e, compPath })

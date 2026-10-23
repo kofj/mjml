@@ -1,12 +1,10 @@
 /* eslint-disable no-console */
 import chokidar from 'chokidar'
-import glob from 'glob'
+import { sync } from 'glob'
+import { match } from 'minimatch'
 import path from 'path'
 import mjml2html from 'mjml-core'
 import { flow, pickBy, flatMap, uniq, difference, remove } from 'lodash/fp'
-import { omit } from 'lodash'
-import { html as htmlBeautify } from 'js-beautify'
-import { minify as htmlMinify } from 'html-minifier'
 
 import readFile from './readFile'
 import makeOutputToFile from './outputToFile'
@@ -21,9 +19,27 @@ const flatMapKeyAndValues = flow(
   uniq,
 )
 
+// chokidar v4 no longer expands glob patterns itself, so watch the nearest
+// non-glob ancestor directory instead and let the existing add/change
+// handlers filter matches against the original input patterns.
+const hasMagic = (segment) => /[*?{}[\]!()]/.test(segment)
+const globBase = (pattern) => {
+  const segments = pattern.split('/')
+  const magicIndex = segments.findIndex(hasMagic)
+  if (magicIndex === -1) {
+    return pattern
+  }
+  return segments.slice(0, magicIndex).join('/') || '.'
+}
+
 export default (input, options) => {
   const dependencies = {}
   const outputToFile = makeOutputToFile(options.o)
+  const baseRoots = input.map((i) => path.resolve(globBase(i.replace(/\\/g, '/'))))
+  const isUnderBaseRoot = (filePath) =>
+    baseRoots.some(
+      (root) => filePath === root || filePath.startsWith(`${root}${path.sep}`),
+    )
   const getRelatedFiles = (file) =>
     flow(
       pickBy((v, k) => k === file || v.indexOf(file) !== -1),
@@ -41,57 +57,42 @@ export default (input, options) => {
     /* eslint-disable no-use-before-define */
     const files = {
       toWatch: flatMapKeyAndValues(dependencies),
-      watched: flatMapAndJoin(watcher.getWatched()),
+      // Never prune paths under the originally-watched roots: sibling input
+      // files not yet registered in `dependencies` must stay watched too.
+      watched: flatMapAndJoin(watcher.getWatched()).filter(
+        (p) => !isUnderBaseRoot(p),
+      ),
     }
 
     watcher.add(difference(files.toWatch, files.watched))
     watcher.unwatch(difference(files.watched, files.toWatch))
     /* eslint-enable no-use-before-define */
   }
-  const readAndCompile = flow(
-    (file) => ({ file, content: readFile(file).mjml }),
-    (args) => {
-      const { config, beautifyConfig, minifyConfig } = options
-      const beautify = config.beautify && config.beautify !== 'false'
-      const minify = config.minify && config.minify !== 'false'
+  const readAndCompile = async (file) => {
+    const { config } = options
+    const beautify = config.beautify && config.beautify !== 'false'
+    const minify = config.minify && config.minify !== 'false'
+    const content = readFile(file).mjml
+    const compiled = await mjml2html(content, {
+      ...config,
+      beautify,
+      minify,
+      filePath: file,
+      actualPath: file,
+    })
 
-      const compiled = mjml2html(args.content, {
-        filePath: args.file,
-        actualPath: args.file,
-        ...omit(config, ['minify', 'beautify']),
-      })
-      if (beautify) {
-        compiled.html = htmlBeautify(compiled.html, beautifyConfig)
-      }
-      if (minify) {
-        compiled.html = htmlMinify(compiled.html, {
-          ...minifyConfig,
-          ...config.minifyOptions,
-        })
-      }
+    compiled.errors.forEach((e) => console.warn(e.formattedMessage))
 
-      return {
-        ...args,
-        compiled,
-      }
-    },
-    (args) => {
-      const {
-        compiled: { errors },
-      } = args
-
-      errors.forEach((e) => console.warn(e.formattedMessage))
-
-      return args
-    },
-    (args) =>
-      outputToFile(args)
-        .then(() => console.log(`${args.file} - Successfully compiled`))
-        .catch(() => console.log(`${args.file} - Error while compiling file`)),
-  )
+    try {
+      await outputToFile({ file, compiled })
+      console.log(`${file} - Successfully compiled`)
+    } catch (e) {
+      console.log(`${file} - Error while compiling file`)
+    }
+  }
 
   const watcher = chokidar
-    .watch(input.map((i) => i.replace(/\\/g, '/')))
+    .watch(input.map((i) => globBase(i.replace(/\\/g, '/'))))
     .on('change', (file) => synchronyzeWatcher(path.resolve(file)))
     .on('add', (file) => {
       const filePath = path.resolve(file)
@@ -99,7 +100,7 @@ export default (input, options) => {
 
       const matchInputOption = input.reduce(
         (found, file) =>
-          found || glob(path.resolve(file)).minimatch.match(filePath),
+          found || match(sync(path.resolve(file)), filePath)?.length > 0,
         false,
       )
 
@@ -122,11 +123,9 @@ export default (input, options) => {
   setInterval(() => {
     dirty.forEach((f) => {
       console.log(`${f} - Change detected`)
-      try {
-        readAndCompile(f)
-      } catch (e) {
+      readAndCompile(f).catch((e) => {
         console.log(`${f} - Error while rendering the file : `, e)
-      }
+      })
     })
     dirty = []
   }, 500)

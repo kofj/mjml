@@ -4,6 +4,11 @@ import { suffixCssClasses } from 'mjml-core'
 export default class MjWrapper extends MjSection {
   static componentName = 'mj-wrapper'
 
+  static allowedAttributes = {
+    ...MjSection.allowedAttributes,
+    gap: 'unit(px)',
+  }
+
   renderWrappedChildren() {
     const { children } = this.props
     const { containerWidth } = this.context

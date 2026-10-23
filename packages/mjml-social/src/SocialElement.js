@@ -14,6 +14,11 @@ const defaultSocialNetworks = {
     'background-color': '#55acee',
     src: `${IMG_BASE_URL}twitter.png`,
   },
+  x: {
+    'share-url': 'https://twitter.com/intent/tweet?url=[[URL]]',
+    'background-color': '#000000',
+    src: `${IMG_BASE_URL}twitter-x.png`,
+  },
   google: {
     'share-url': 'https://plus.google.com/share?url=[[URL]]',
     'background-color': '#dc4e41',
@@ -94,9 +99,11 @@ export default class MjSocialElement extends BodyComponent {
 
   static allowedAttributes = {
     align: 'enum(left,center,right)',
+    'icon-position': 'enum(left,right)',
     'background-color': 'color',
     color: 'color',
-    'border-radius': 'unit(px)',
+    border: 'string',
+    'border-radius': 'string',
     'font-family': 'string',
     'font-size': 'unit(px)',
     'font-style': 'string',
@@ -127,7 +134,9 @@ export default class MjSocialElement extends BodyComponent {
   static defaultAttributes = {
     alt: '',
     align: 'left',
+    'icon-position': 'left',
     color: '#000',
+    border: '0',
     'border-radius': '3px',
     'font-family': 'Ubuntu, Helvetica, Arial, sans-serif',
     'font-size': '13px',
@@ -168,12 +177,14 @@ export default class MjSocialElement extends BodyComponent {
         width: iconSize,
       },
       img: {
+        border: this.getAttribute('border'),
         'border-radius': this.getAttribute('border-radius'),
         display: 'block',
       },
       tdText: {
         'vertical-align': 'middle',
         padding: this.getAttribute('text-padding'),
+        'text-align': this.getAttribute('align'),
       },
       text: {
         color: this.getAttribute('color'),
@@ -223,17 +234,12 @@ export default class MjSocialElement extends BodyComponent {
       sizes,
       href,
       'icon-size': iconSize,
-      'icon-height': iconHeight,
     } = this.getSocialAttributes()
 
     const hasLink = !!this.getAttribute('href')
+    const iconPosition = this.getAttribute('icon-position')
 
-    return `
-      <tr
-        ${this.htmlAttributes({
-          class: this.getAttribute('css-class'),
-        })}
-      >
+    const makeIcon = () => `
         <td ${this.htmlAttributes({ style: 'td' })}>
           <table
             ${this.htmlAttributes({
@@ -260,7 +266,6 @@ export default class MjSocialElement extends BodyComponent {
                       ${this.htmlAttributes({
                         alt: this.getAttribute('alt'),
                         title: this.getAttribute('title'),
-                        height: parseInt(iconHeight || iconSize, 10),
                         src,
                         style: 'img',
                         width: parseInt(iconSize, 10),
@@ -274,6 +279,9 @@ export default class MjSocialElement extends BodyComponent {
             </tbody>
           </table>
         </td>
+      `
+
+    const makeContent = () => `
         ${
           this.getContent()
             ? `
@@ -298,6 +306,18 @@ export default class MjSocialElement extends BodyComponent {
           `
             : ''
         }
+      `
+
+    const renderLeft = () => `${makeIcon()} ${makeContent()}`
+    const renderRight = () => `${makeContent()} ${makeIcon()}`
+
+    return `
+      <tr
+        ${this.htmlAttributes({
+          class: this.getAttribute('css-class'),
+        })}
+      >
+        ${iconPosition === 'left' ? renderLeft() : renderRight()}
       </tr>
     `
   }

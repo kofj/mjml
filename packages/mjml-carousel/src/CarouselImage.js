@@ -13,9 +13,9 @@ export default class MjCarouselImage extends BodyComponent {
     title: 'string',
     src: 'string',
     'thumbnails-src': 'string',
-    'border-radius': 'unit(px,%){1,4}',
+    'border-radius': 'string',
     'tb-border': 'string',
-    'tb-border-radius': 'unit(px,%){1,4}',
+    'tb-border-radius': 'string',
   }
 
   static defaultAttributes = {
@@ -24,6 +24,7 @@ export default class MjCarouselImage extends BodyComponent {
   }
 
   getStyles() {
+    const hasThumbnailsSupported = this.hasThumbnailsSupported()
     return {
       images: {
         img: {
@@ -49,7 +50,7 @@ export default class MjCarouselImage extends BodyComponent {
         a: {
           border: this.getAttribute('tb-border'),
           'border-radius': this.getAttribute('tb-border-radius'),
-          display: 'inline-block',
+          display: hasThumbnailsSupported ? 'none' : 'inline-block',
           overflow: 'hidden',
           width: this.getAttribute('tb-width'),
         },
@@ -60,6 +61,12 @@ export default class MjCarouselImage extends BodyComponent {
         },
       },
     }
+  }
+
+  hasThumbnailsSupported() {
+    const thumbnails =
+      this.getAttribute('thumbnails') || this.context.thumbnails
+    return thumbnails === 'supported'
   }
 
   renderThumbnail() {
@@ -142,7 +149,7 @@ export default class MjCarouselImage extends BodyComponent {
       >
         ${
           href
-            ? `<a ${this.htmlAttributes({ href, rel, target: "_blank" })}>${image}</a>`
+            ? `<a ${this.htmlAttributes({ href, rel, target: '_blank' })}>${image}</a>`
             : image
         }
       </div>

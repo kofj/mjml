@@ -9,7 +9,7 @@ export default class MjCarousel extends BodyComponent {
 
   static allowedAttributes = {
     align: 'enum(left,center,right)',
-    'border-radius': 'unit(px,%){1,4}',
+    'border-radius': 'string',
     'container-background-color': 'color',
     'icon-width': 'unit(px,%)',
     'left-icon': 'string',
@@ -19,9 +19,9 @@ export default class MjCarousel extends BodyComponent {
     'padding-left': 'unit(px,%)',
     'padding-right': 'unit(px,%)',
     'right-icon': 'string',
-    thumbnails: 'enum(visible,hidden)',
+    thumbnails: 'enum(visible,hidden,supported)',
     'tb-border': 'string',
-    'tb-border-radius': 'unit(px,%)',
+    'tb-border-radius': 'string',
     'tb-hover-border-color': 'color',
     'tb-selected-border-color': 'color',
     'tb-width': 'unit(px,%)',
@@ -136,6 +136,19 @@ export default class MjCarousel extends BodyComponent {
       border-color: ${this.getAttribute('tb-selected-border-color')} !important;
     }
 
+    ${range(0, length)
+      .map(
+        (i) =>
+          `.mj-carousel-${carouselId}-radio-${i + 1}:checked ${repeat(
+            '+ * ',
+            length - i - 1,
+          )}+ .mj-carousel-content .mj-carousel-${carouselId}-thumbnail
+          `,
+      )
+      .join(',')} {
+      display: inline-block !important;
+    }
+
     .mj-carousel-image img + div,
     .mj-carousel-thumbnail img + div {
       display: none !important;
@@ -186,9 +199,9 @@ export default class MjCarousel extends BodyComponent {
           }
 
           .mj-carousel-${carouselId}-radio-1:checked ${repeat(
-      '+ *',
-      length - 1,
-    )}+ .mj-carousel-content .mj-carousel-${carouselId}-thumbnail-1 {
+            '+ *',
+            length - 1,
+          )}+ .mj-carousel-content .mj-carousel-${carouselId}-thumbnail-1 {
               border-color: transparent;
           }
       }
@@ -261,7 +274,8 @@ export default class MjCarousel extends BodyComponent {
   }
 
   generateThumbnails() {
-    if (this.getAttribute('thumbnails') !== 'visible') return ''
+    if (!['visible', 'supported'].includes(this.getAttribute('thumbnails')))
+      return ''
 
     return this.renderChildren(this.props.children, {
       attributes: {
@@ -344,8 +358,8 @@ export default class MjCarousel extends BodyComponent {
         ${this.htmlAttributes({
           style: 'carousel.table',
           border: '0',
-          'cellpadding': '0',
-          'cellspacing': '0',
+          cellpadding: '0',
+          cellspacing: '0',
           width: '100%',
           role: 'presentation',
           class: 'mj-carousel-main',
@@ -373,6 +387,13 @@ export default class MjCarousel extends BodyComponent {
         },
       }),
     )
+  }
+
+  getChildContext() {
+    return {
+      ...this.context,
+      thumbnails: this.getAttribute('thumbnails'),
+    }
   }
 
   render() {

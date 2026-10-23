@@ -6,7 +6,8 @@ export default class MjSocial extends BodyComponent {
 
   static allowedAttributes = {
     align: 'enum(left,right,center)',
-    'border-radius': 'unit(px,%)',
+    border: 'string',
+    'border-radius': 'string',
     'container-background-color': 'color',
     color: 'color',
     'font-family': 'string',
@@ -60,6 +61,7 @@ export default class MjSocial extends BodyComponent {
     }
 
     return [
+      'border',
       'border-radius',
       'color',
       'font-family',

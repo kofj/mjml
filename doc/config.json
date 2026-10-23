@@ -34,6 +34,7 @@
   "mjml/doc/ending-tags.md",
   "mjml/doc/community-components.md",
   "mjml/doc/ports.md",
+  "mjml/doc/mjml-bar-chart.md",
   "mjml/doc/mjml-chart.md",
   "mjml/doc/mjml-chartjs.md",
   "mjml/doc/mjml-qr-code.md",
@@ -42,5 +43,5 @@
   "mjml/doc/create.md",
   "mjml/doc/using_mjml_in_json.md",
   "mjml/doc/tooling.md",
-  "mjml/doc/passport.md"
+  "mjml/doc/community-contributions.md"
 ]

@@ -1,11 +1,12 @@
 import fs from 'fs'
 import path from 'path'
 
-const includeRegexp = /<mj-include[^<>]+path=['"](.*(?:\.mjml|\.css|\.html))['"]\s*[^<>]*(\/>|>\s*<\/mj-include>)/gi
+const includeRegexp =
+  /<mj-include[^<>]+path=['"](.*(?:\.mjml|\.css|\.html))['"]\s*[^<>]*(\/>|>\s*<\/mj-include>)/gi
 
-const ensureIncludeIsSupportedFile = (file) => 
+const ensureIncludeIsSupportedFile = (file) =>
   path.extname(file).match(/\.mjml|\.css|\.html/) ? file : `${file}.mjml`
-  
+
 const error = (e) => console.error(e.stack || e) // eslint-disable-line no-console
 
 export default (baseFile, filePath) => {
@@ -56,7 +57,15 @@ export default (baseFile, filePath) => {
 
       const includedFilePath = path.resolve(path.join(targetDir, includedFile))
 
-      filesIncluded.push(includedFilePath)
+      // Resolve symlinks to their real paths so chokidar's followSymlinks behavior
+      // matches our dependency tracking (chokidar reports changes on real paths)
+      let realPath = includedFilePath
+      try {
+        realPath = fs.realpathSync(includedFilePath)
+      } catch (e) {
+        // If realpathSync fails (file doesn't exist yet), use the resolved path as-is
+      }
+      filesIncluded.push(realPath)
 
       readIncludes(targetDir, includedFile, currentFile)
       matchgroup = includes.exec(content)

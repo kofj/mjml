@@ -1,42 +1,43 @@
+## Getting Started
 
-# Getting Started
-This is a responsive email
+This is a responsive email:
 
-<p style="text-align: center;" >
-  <img width="300px" src="https://cloud.githubusercontent.com/assets/6558790/12751054/322b2c8c-c9bb-11e5-98b9-942f6ea4d585.png" alt="layout">
-</p>
+<figure>
+  <img width="300px" src="https://static.mailjet.com/mjml-website/documentation/getting-started-1.png" alt="layout">
+</figure>
 
 Like a regular HTML template, we can split this one into different parts to fit in a grid.
 
 The body of your email, represented by the `mj-body` tag contains the entire content of your document:
 
-<p style="text-align: center;" >
-  <img width="300px" src="https://cloud.githubusercontent.com/assets/6558790/12751043/1fd499c4-c9bb-11e5-828f-e0e6e18180b8.png" alt="body">
-</p>
+<figure>
+  <img width="300px" src="https://static.mailjet.com/mjml-website/documentation/getting-started-2.png" alt="the body is overlaid with a semi opaque orange color">
+</figure>
 
 From here, you can first define your sections:
 
-<p style="text-align: center;" >
-  <img width="300px" src="https://cloud.githubusercontent.com/assets/6558790/12751042/1fd191b6-c9bb-11e5-9450-cc15acec72b4.png" alt="sections">
-</p>
+<figure>
+  <img width="300px" src="https://static.mailjet.com/mjml-website/documentation/getting-started-3.png" alt="each section is overlaid with various semi opaque colors">
+</figure>
 
 Inside any section, there should be columns (even if you need only one column). Columns are what makes MJML responsive.
 
-<p style="text-align: center;" >
-  <img width="300px" src="https://cloud.githubusercontent.com/assets/6558790/12751041/1fd112d6-c9bb-11e5-97e7-d9c93c743c4d.png" alt="columns">
-</p>
+<figure>
+  <img width="300px" src="https://static.mailjet.com/mjml-website/documentation/getting-started-4.png" alt="each column is overlaid with various semi opaque colors">
+</figure>
 
 Below, you'll find some basic rules of MJML to keep in mind for later. We'll remind them when useful but better start learning them early on.
 
-## Column sizing
+### Column sizing
 
-### Auto sizing
+#### Auto sizing
 
 The default behavior of the MJML translation engine is to divide the section space (600px by default, but it can be changed with the `width` attribute on `mj-body`) in as many columns as you declare.
 
-<aside class="warning">
-  Any mj-element included in a column will have a width equivalent to 100% of this column's width.
-</aside>
+<div class="alert alert-note" role="alert">
+  <p>Note</p>
+  <p>Any MJML component included in a column will have a width equivalent to 100% of this column's width.</p>
+</div>
 
 Let's take the following layout to illustrate this:
 
@@ -57,11 +58,8 @@ Let's take the following layout to illustrate this:
 
 Since the first section defines only 2 columns, the engine will translate that in a layout where each column takes 50% of the total space (300px each). If we add a third one, it goes down to 33%, and with a fourth one to 25%.
 
-<p>
-  <br/><br/><br/><br/><br/><br/><br/><br/>
-</p>
+#### Manual sizing
 
-### Manual sizing
 You can also manually set the size of your columns, in pixels or percentage, by using the `width` attribute on `mj-column`.
 
 Let's take the following layout to illustrate this:
@@ -81,16 +79,27 @@ Let's take the following layout to illustrate this:
 </mjml>
 ```
 
-## Nesting
+#### Section gutter
+
+To add consistent spacing between columns, set a `gutter` on `mj-section`. The gutter is declared on the section and applies to all of its columns.
 
 ```html
 <mjml>
   <mj-body>
-    <mj-section>
+    <mj-section gutter="4%">
       <mj-column>
-        <!-- Column content -->
+        <!-- First column content -->
+      </mj-column>
+      <mj-column>
+        <!-- Second column content -->
       </mj-column>
     </mj-section>
   </mj-body>
 </mjml>
 ```
+
+When stacked in a single column on mobile, the gutter will display vertically between the columns.
+
+**Note:** the gutter is automatically removed from any declared width on `mj-column`. You do not need to work the values out yourself. e.g. if you declare a `4%` gutter and two `mj-column` instances with `50%` width each then the actual displayed width of the column will be 48% with 2% gutters between the two columns.
+
+You can use the existing `padding` attribute to set spacing between the end columns and the edges.

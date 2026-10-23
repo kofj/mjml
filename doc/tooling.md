@@ -1,49 +1,73 @@
-# Tooling
+## Tooling
 
-In order to provide you with the best experience with MJML and help you use it more efficiently, we've developed some tools to integrate it seamlessly in your development workflow:
+In order to provide you with the best and most efficient experience using MJML, we've developed some tools to integrate it seamlessly into your development workflow:
 
-## Visual Studio Code
+### Visual Studio Code
 
-[Visual Studio Code](https://code.visualstudio.com/) is a free code editor made by [Microsoft](https://www.microsoft.com/). We recommend this package as it is among the most feature-rich MJML plugins for code editors with live previews, syntax highlighting and linting as well as export features including HTML and screenshots. It is available [on Github](https://github.com/mjmlio/vscode-mjml) and through the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=mjmlio.vscode-mjml).
+[Visual Studio Code](https://code.visualstudio.com/) is a free code editor made by [Microsoft](https://www.microsoft.com/). We recommend this package as it is among the most feature-rich MJML plugins for code editors; with live previews, syntax highlighting and linting, as well as export features including HTML and screenshots.
 
-## Parcel
+It is available [on Github](https://github.com/mjmlio/vscode-mjml) and through the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=mjmlio.vscode-mjml).
 
-[Parcel](https://parcel.io) is the code editor built for email. This feature packed tool includes syntax highlighting, Emmet, inline documentation, autocomplete, live preview, screenshots, and full MJML, CSS, and HTML validation. Use Focus Mode to keep the preview aligned with the code you're working on, or Inspect Element to easily find the code that produces specific elements in the preview. Export MJML to HTML with a click.
+### Sublime Text
 
-## Atom language plugin
+[Sublime Text](https://www.sublimetext.com/) is a powerful text editor. We’ve provided you with a package to color MJML tags.
 
-[Atom](https://atom.io) is a powerful text editor originally released by [Github](https://github.com). This package provides autocompletion and syntax highlighting for MJML. It is available [on Github](https://github.com/mjmlio/language-mjml) and through the [Atom Package Manager (APM)](https://atom.io/packages/language-mjml).
+It is available [on Github](https://github.com/mjmlio/mjml-syntax) and through the [Sublime Package Control](https://packagecontrol.io/packages/MJML-syntax).
 
-## Atom linter
+### Gulp
 
-In addition to the language plugin, a linter is available to highlight errors in MJML. The linter is available [on Github](https://github.com/mjmlio/atom-linter-mjml) and through the [Atom Package Manager (APM)](https://atom.io/packages/linter-mjml).
+[Gulp](https://gulpjs.com/) is a tool designed to help you automate and enhance your workflow. Our plugin enables you to plug the MJML translation engine into your workflow, helping you to streamline your development workflow.
 
-## Sublime Text
+It is available here on [Github](https://github.com/mjmlio/gulp-mjml).
 
-[Sublime Text](https://www.sublimetext.com/) is a powerful text editor. We're providing you with a package to color MJML tags. It is available [on Github](https://github.com/mjmlio/mjml-syntax) and through the [Sublime Package Control](https://packagecontrol.io/packages/MJML-syntax).
+## Template Tokens in CSS
 
-## IntelliJ IDEA Plugin - MJML Support
+MJML can safely minify and beautify HTML and CSS while preserving template tokens embedded in CSS. This is useful when your templating system (Liquid, Handlebars, etc.) injects dynamic values into style attributes or `<style>` blocks.
 
-[IntelliJ IDEA](https://www.jetbrains.com/idea/) is an IDE developed by JetBrains. The plugin provides you with a (near) realtime preview, auto complete, inline documentation and code analysis. Its available on the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/16418-mjml-support).
+- **Supported contexts:** CSS value tokens (`color: {{primary}}`) and CSS property-name tokens (`{{prop}}: {{value}}`), as well as block tokens inside style contexts.
+- **Enable sanitization:** pass `sanitizeStyles: true` when you also enable `minify: true` or `beautify: true`. Configure token wrappers with `templateSyntax` (array of `{ prefix, suffix }` pairs, defaults to `{{…}}` and `[[…]]`).
+- **Mixed syntax:** by default MJML disallows mixing block tokens with CSS tokens in the same document. Opt-in via `allowMixedSyntax: true` if you need to mix.
+- **Broken delimiters pre-check:** MJML fails fast when it detects unbalanced token delimiters inside CSS (e.g. more `{{` than `}}`). Fix your tokens or disable CSS minification.
 
-## Gradle Plugin - MJML Compilation
-[Gradle](https://gradle.org/) is a build tool for a various set of languages and environments, mainly used for java/kotlin. The plugin provides an easy way to embed your mjml templates to your java/kotlin application in its resources in precompiled form (html). 
-It's available through the gradle plugin system [io.freefair.mjml.java](https://plugins.gradle.org/plugin/io.freefair.mjml.java) and documentation is available here [FreeFair User Guide](https://docs.freefair.io/gradle-plugins/current/reference/)
+### CLI examples
 
-## Gulp
+- Preserve CSS tokens while minifying:
 
-Gulp is a tool designed to help you automate and enhance your workflow. Our plugin enables you to plug the MJML translation engine into your workflow, helping you to streamline your development workflow. It is available here on [Github](https://github.com/mjmlio/gulp-mjml)
+```bash
+mjml input.mjml -o out.html --config.sanitizeStyles true --config.minify true
+```
 
-## Neos CMS
+- Allow mixed syntax:
 
-[Neos CMS](https://www.neos.io/) is a content management system that combines structured content with application. This package adds the helper for compiling `MJML` markup as well as some prototypes which allow to use TailwindCSS like classes in your `MJML` markup. It is available on [packagist](https://packagist.org/packages/garagist/mjml)
+```bash
+mjml input.mjml -o out.html --config.sanitizeStyles true --config.minify true --config.allowMixedSyntax true
+```
 
-## Easy-email
+- Disable CSS minification (to bypass token pre-check/minifier):
 
-[Easy-email](https://github.com/zalify/easy-email) is a Drag-and-Drop Email Editor based on MJML. Transform structured JSON data into major email clients compatible HTML. Written in Typescript and supported both in browser and Node.js.
+```bash
+mjml input.mjml -o out.html --config.minify true --config.minifyOptions '{"minifyCss": false}'
+```
 
-## Contribute to the MJML ecosystem
+### Programmatic usage
 
-The MJML ecosystem is still young and we're also counting on your help to help us make it grow and provide its community with even more awesome tools, always aiming to making development with MJML an efficient and fun process!
+```js
+async function example() {
+	const { html } = await mjml(input, {
+		minify: true,
+		sanitizeStyles: true,
+		templateS­yntax: [
+			{ prefix: '{{', suffix: '}}' },
+			{ prefix: '[[', suffix: ']]' },
+		],
+		allowMixedSyntax: false, // set true to allow block + CSS tokens together
+		// Disable CSS minify if your tokens are broken or your minifier cannot parse them:
+		minifyOptions: { minifyCss: false },
+	})
+	// use html variable
+}
 
-Getting involved is really easy. If you want to contribute, feel free to [open an issue](https://github.com/mjmlio/mjml/issues) or [submit a pull-request](https://github.com/mjmlio/mjml/pulls)!
+example()
+```
+
+For the canonical list of CLI flags and Node.js options, see [Usage](https://documentation.mjml.io/#usage)
